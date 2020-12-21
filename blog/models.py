@@ -8,7 +8,6 @@ import datetime
 
 YEAR_CHOICES = [(r, r) for r in range(1950, datetime.date.today().year + 1)]
 
-
 class Post(models.Model):
     title = models.CharField(max_length=100)
     content = HTMLField()

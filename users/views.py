@@ -82,6 +82,8 @@ def user_detail(request, pk):
     profile = Profile.objects.get(id__exact=pk)
     return render(request, 'users/profile_detail.html', {'object': profile, 'grants': profile.grant_set.all()})
 
+# TODO debug
+
 
 def grant_add(request, pk):
     profile = request.user.profile
