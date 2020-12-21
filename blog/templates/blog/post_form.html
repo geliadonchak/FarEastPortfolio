@@ -1,0 +1,20 @@
+{% extends 'blog/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js"></script>
+<script>tinymce.init({selector:'textarea'});</script>
+	<div class="card p-2 shadow-lg">
+		<div class="container">
+			<form method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
+				<fieldset class="form-group">
+					<legend class="border-bottom mb-4">Создать пост</legend>
+					{{ form|crispy }}
+				</fieldset>
+				<div class="form-group text-center">
+					<button class="btn btn-dark" type="submit">Создать</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{% endblock content %}
