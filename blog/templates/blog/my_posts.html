@@ -30,7 +30,10 @@
                             <a href="{% url 'user-detail' post.author.profile.id %}">
                                 {{ post.author.first_name }} {{ post.author.last_name }}
                             </a>
-                            {{ post.date|date:"F d, Y" }} {{ post.journal }} {{ post.volume }} {{ post.number }}
+                            {{ post.date|date:"F d, Y" }}
+                            {% if post.journal %} {{ post.journal }} {% endif %}
+                            {% if post.volume %} {{ post.volume }} {% endif %}
+                            {% if post.number %} {{ post.number }} {% endif %}
                         </div>
                         <div class="col text-right">
                             <a href="{% url 'post-detail' post.id %}">Подробнее</a>

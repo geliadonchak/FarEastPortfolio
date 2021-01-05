@@ -16,7 +16,7 @@ class Post(models.Model):
     volume = models.IntegerField(blank=True, null=True)
     number = models.IntegerField(blank=True, null=True)
     date = models.IntegerField(choices=YEAR_CHOICES, null=True, blank=True)
-    file = models.FileField(upload_to='files/', null=True, max_length=1e3)
+    file = models.FileField(upload_to='files/', null=True, blank=True, max_length=1e3)
     has_moderated = models.BooleanField(default=False)
 
     def __str__(self):

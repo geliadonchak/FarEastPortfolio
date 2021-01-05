@@ -38,7 +38,8 @@ def home(request):
                         (Q(author__first_name__icontains=author[0]) & Q(author__last_name__icontains=author[1])) |
                         (Q(author__first_name__icontains=author[1]) & Q(author__last_name__icontains=author[0]))).all()
             if organization:
-                posts += Post.objects.filter(has_moderated=True).filter(author__profile__organization__name__icontains=organization).all()
+                posts += Post.objects.filter(has_moderated=True).filter(
+                    author__profile__organization__name__icontains=organization).all()
             if journal:
                 posts += Post.objects.filter(has_moderated=True).filter(journal__icontains=journal).all()
     else:
@@ -171,5 +172,4 @@ def delete_several_posts(request):
 
 
 def publish_several_posts(request):
-
     return None
