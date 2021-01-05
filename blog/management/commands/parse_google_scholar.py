@@ -3,46 +3,92 @@ from django.core.management.base import BaseCommand
 import requests
 import re
 
+from blog.models import Post
+
 SITE_URL = 'https://scholar.google.com'
 SEARCH_URL = '/scholar?hl=ru&q={query}'
 
-SEARCH_PAGE_REGEXP = r'href=\"(?P<url>https:\/\/elibrary\.ru\/item\.asp\?id=[^\"]*)\"'
+SEARCH_PAGE_REGEXP = r'<h3[^>]*gs_rt.*?<a[^>]*href=\"(?P<url>[^\"]*)\"[^>]*>(?P<title>[^<]*)<\/a.*?<div[^>]*class=\"gs_a\"[^>]*>(?P<authors>[^-]*)-(?P<other>.*?)-'
 SEARCH_NEXT_PAGE_REGEXP = r'<a href=\"(?P<nextPage>[^\"]*)\"><span[^>]*gs_ico_nav_next[^>]*></span><b[^>]*>Следующая</b></a></td>'
-ELIBRARY_REGEXP = r''
-MAX_PAGE_NUMBER = 5
+MAX_PAGE_NUMBER = 3
+
+NAMES_MAPPER = {
+    'url': 0,
+    'title': 1,
+    'authors': 2,
+    'other': 3,
+}
 
 
 class Command(BaseCommand):
-    parsed_urls = []
+    parsed_posts = []
+    current_user_id = None
 
-    def parse_search_pages(self, users):
-        for user in users:
-            query = user['first_name'] + ' ' + user['last_name']
-            url = SITE_URL + SEARCH_URL.replace('{query}', query.replace(' ', '+'))
-            page_number = 1
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '-user',
+            action='store',
+            default=None,
+            help='ID of user',
+            required=True
+        )
 
-            while page_number <= MAX_PAGE_NUMBER:
-                print("Query: " + query + "; page: " + str(page_number))
-                page = requests.get(url).text
-                for match in re.findall(SEARCH_PAGE_REGEXP, page):
-                    self.parsed_urls.append(match)
+    def parse_search_pages(self, query):
+        url = SITE_URL + SEARCH_URL.replace('{query}', query.replace(' ', '+'))
+        page_number = 1
 
-                nextPageMatch = re.search(SEARCH_NEXT_PAGE_REGEXP, page)
-                if nextPageMatch is None:
-                    break
+        while page_number <= MAX_PAGE_NUMBER:
+            print("Query: " + query + "; page: " + str(page_number))
+            page = requests.get(url).text
+            for match in re.findall(SEARCH_PAGE_REGEXP, page):
+                self.save_post(match)
 
-                url = SITE_URL + nextPageMatch.group('nextPage').replace('&amp;', '&')
-                page_number += 1
+            next_page_match = re.search(SEARCH_NEXT_PAGE_REGEXP, page)
+            if next_page_match is None:
+                break
 
-    def handle(self, *args, **kwargs):
-        users = User.objects.filter(is_staff=False).all().values()
-        self.parse_search_pages(users)
-        print()
+            url = SITE_URL + next_page_match.group('nextPage').replace('&amp;', '&')
+            page_number += 1
 
-        self.parsed_urls = list(set(self.parsed_urls))
+    def save_post(self, match):
+        post = Post()
 
-        for url in self.parsed_urls:
-            print('Parsing url ' + url)
-            # TODO save posts
-            # TODO parse by username
-            # TODO add parser to cron on server
+        url = self.clean_str(str(match[NAMES_MAPPER['url']]))
+
+        post.title = self.clean_str(str(match[NAMES_MAPPER['title']]))
+        post.content = "<a href=\"{}\">{}</a>".format(url, url)
+
+        other_info = str(match[NAMES_MAPPER['other']]).strip()
+        year_match = re.search(r'\d{4}', other_info)
+        if year_match is not None:
+            post.date = int(year_match[0])
+
+        self.parsed_posts.append(post)
+
+    @staticmethod
+    def clean_str(s: str):
+        return re.sub(
+            r'<[^>]*>',
+            '',
+            s.strip()
+        )
+
+    def handle(self, *args, **options):
+        user = User.objects.filter(pk=int(options['user'])).all().values()
+        if len(user) != 1:
+            print("Пользователь с id {} не найден".format(options['user']))
+            return
+        query = user[0]['first_name'] + ' ' + user[0]['last_name']
+        self.current_user_id = user[0]['id']
+
+        self.parse_search_pages(query)
+
+        count = 0
+        for post in self.parsed_posts:
+            post.author_id = self.current_user_id
+
+            if len(Post.objects.filter(title=post.title).all().values()) == 0:
+                count += 1
+                post.save()
+
+        print("Сохранено {} статей".format(count))

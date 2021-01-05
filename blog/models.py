@@ -13,9 +13,9 @@ class Post(models.Model):
     content = HTMLField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     journal = models.CharField(max_length=150)
-    volume = models.IntegerField()
-    number = models.IntegerField()
-    date = models.IntegerField(choices=YEAR_CHOICES)
+    volume = models.IntegerField(blank=True, null=True)
+    number = models.IntegerField(blank=True, null=True)
+    date = models.IntegerField(choices=YEAR_CHOICES, null=True, blank=True)
     file = models.FileField(upload_to='files/', null=True, max_length=1e3)
     has_moderated = models.BooleanField(default=False)
 
