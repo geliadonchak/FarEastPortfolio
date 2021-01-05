@@ -1,15 +1,15 @@
 import re
 
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Post, Comment
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.models import User
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+
+from users.models import Profile
 from .forms import FilterForm, CommentForm, PostForm
-from users.models import Profile, Organization
-from django.db.models import Q
+from .models import Post
 
 
 def home(request):
@@ -19,7 +19,9 @@ def home(request):
         if filter_form.is_valid():
             content = filter_form.cleaned_data.get('content').strip()
             author = filter_form.cleaned_data.get('author')
+            author = transliterate_to_ru(author)
             organization = filter_form.cleaned_data.get('organization')
+            organization = organization.upper()
             journal = filter_form.cleaned_data.get('journal')
             if content:
                 content = content.split('.')
@@ -173,3 +175,35 @@ def delete_several_posts(request):
 
 def publish_several_posts(request):
     return None
+
+
+DICTIONARY = {'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
+              'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'i', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n',
+              'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h',
+              'ц': 'c', 'ч': 'cz', 'ш': 'sh', 'щ': 'scz', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e',
+              'ю': 'u', 'я': 'ja', 'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'E',
+              'Ж': 'ZH', 'З': 'Z', 'И': 'I', 'Й': 'I', 'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N',
+              'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ф': 'F', 'Х': 'H',
+              'Ц': 'C', 'Ч': 'CZ', 'Ш': 'SH', 'Щ': 'SCH', 'Ъ': '', 'Ы': 'y', 'Ь': '', 'Э': 'E',
+              'Ю': 'U', 'Я': 'YA', ',': '', '?': '', ' ': ' ', '~': '', '!': '', '@': '', '#': '',
+              '$': '', '%': '', '^': '', '&': '', '*': '', '(': '', ')': '', '-': '', '=': '', '+': '',
+              ':': '', ';': '', '<': '', '>': '', '\'': '', '"': '', '\\': '', '/': '', '№': '',
+              '[': '', ']': '', '{': '', '}': '', 'ґ': '', 'ї': '', 'є': '', 'Ґ': 'g', 'Ї': 'i',
+              'Є': 'e', '—': ''}
+
+
+def transliterate_to_en(name):
+    for key in DICTIONARY:
+        name = name.replace(key, DICTIONARY[key])
+    return name
+
+
+def transliterate_to_ru(name):
+    dictionary = DICTIONARY
+    symbols = ['ё', 'Ё', 'ъ', 'Ъ', 'ь', 'Ь', 'ю', 'Ю', 'я', 'Я']
+    for s in symbols:
+        dictionary[s] = ''
+
+    for key, value in DICTIONARY:
+        name = name.replace(value, key)
+    return name
