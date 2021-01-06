@@ -42,10 +42,6 @@
             </ul>
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{% url 'blog-home' %}">Главная
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link text-white" href="{% url 'post-create' %}">Отправить статью</a>
                 </li>
                 {% if my_posts_count > 0 %}
@@ -58,7 +54,12 @@
                         <a class="nav-link text-white" href="{% url 'suggested-post' %}">Предлагаемые статьи</a>
                     </li>
                 {% endif %}
-                {% if user.profile.access == 'admin' %}
+                {% if role == 'moderator' %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{% url 'organization-create' %}">Добавить организацию</a>
+                    </li>
+                {% endif %}
+                {% if role == 'administrator' %}
                     <li class="nav-item">
                         <a class="nav-link text-white" href="{% url 'admin-panel' %}">Панель управления</a>
                     </li>

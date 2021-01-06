@@ -37,8 +37,8 @@
                         <div class="col text-right">
                             <a href="{% url 'post-detail' post.id %}">Подробнее</a>
                         </div>
-                        <div class="text-center">
-                            <a class="btn bg-blue text-white" href="{% url 'post-publish' post.id %}">Опубликовать</a>
+                        <div class="text-right">
+                            <a class="btn bg-blue text-white mr-1" href="{% url 'post-publish' post.id %}">Опубликовать</a>
                             <a class="btn btn-danger text-white" href="{% url 'post-delete' post.id %}">Удалить</a>
                         </div>
                     </div>

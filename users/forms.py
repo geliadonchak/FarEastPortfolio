@@ -49,9 +49,6 @@ class UserLoginForm(AuthenticationForm):
     )
 
 
-# class UserLogoutForm():
-
-
 class UserUpdateForm(forms.ModelForm):
     email = forms.EmailField()
 

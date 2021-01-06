@@ -14,8 +14,8 @@
 						<legend class="border-bottom mb-4">Добавить грант</legend>
 						{{ form|crispy }}
 					</fieldset>
-					<div class="form-group">
-						<button class="btn btn-dark" type="submit">Сохранить</button>
+					<div class="form-group text-right">
+						<button class="btn bg-blue text-white mr-1" type="submit">Сохранить</button>
 						<a class="btn btn-danger text-white" href="{% url 'user-detail' user.profile.user_id %}">Отмена</a>
 					</div>
 				</form>

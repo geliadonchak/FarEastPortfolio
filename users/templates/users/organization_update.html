@@ -12,10 +12,10 @@
 					{{ form|crispy }}
 				</fieldset>
 				<div class="form-group">
-					<div class="text-center">
-						<button class="btn btn-dark" type="submit">Сохранить</button>
-						<a class="btn btn-dark" href="{% url 'post-detail' object.id %}">Отмена</a>
-						<a class="btn btn-danger" href="{% url 'post-delete' object.id %}">Удалить</a>
+					<div class="text-right">
+						<button class="btn bg-blue text-white mr-1" type="submit">Сохранить</button>
+						<a class="btn bg-blue text-white mr-1" href="{% url 'post-detail' object.id %}">Отмена</a>
+						<a class="btn btn-danger text-white" href="{% url 'post-delete' object.id %}">Удалить</a>
 					</div>
 				</div>
 			</form>

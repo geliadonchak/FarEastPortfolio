@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
+from blog.forms import OrganizationForm
 from blog.models import Post
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, GrantForm, UserLoginForm
 from django.contrib.auth.decorators import login_required
@@ -11,6 +12,7 @@ from django.contrib.auth.models import User
 from django.views.generic import CreateView, DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.management import call_command
 from .models import Profile, Organization
 from dal import autocomplete
 
@@ -24,6 +26,12 @@ def sign_up(request):
             pform.save(user)
             username = uform.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}')
+
+            user = User.objects.filter(username=username).all().values()
+            if len(user) == 1:
+                user_id = user[0]['id']
+                call_command('parse_google_scholar', user=user_id, interactive=False)
+
             return redirect('login')
     else:
         uform = UserRegisterForm()
@@ -60,7 +68,7 @@ def user_update_profile(request, pk):
 
 @login_required
 def admin_panel(request):
-    if request.user.profile.access == 'admin':
+    if request.user.profile.access == 'Администратор':
         return render(request, 'users/admin_panel.html',
                       {'access': request.user.profile.access, 'users': User.objects.all()})
     else:
@@ -97,7 +105,7 @@ def grant_add(request, pk):
         form = GrantForm(request.POST)
         if form.is_valid():
             form.save(profile)
-            return redirect('user-detail', profile.id)
+            return redirect('user-detail', profile.user_id)
     else:
         form = GrantForm()
     return render(request, 'users/grant_add.html', {'profile': Profile.objects.get(user_id=pk), 'form': form})
@@ -113,14 +121,11 @@ class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
         return orgs
 
 
-class OrganizationCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    model = Organization
-    fields = ['name', 'date', 'constitutors', 'address', 'link', 'description']
-
-    def test_func(self):
-        if not self.request.user.profile.access == 'Пользователь':
-            return True
-        return False
+def organization_create(request):
+    if not request.user.is_staff:
+        return HttpResponseForbidden()
+    form = OrganizationForm()
+    return render(request, 'users/organization_form.html', {'form': form})
 
 
 class OrganizationDetailView(DetailView):

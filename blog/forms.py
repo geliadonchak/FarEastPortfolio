@@ -1,4 +1,6 @@
 from django import forms
+
+from users.models import Organization
 from .models import Comment, Post
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
@@ -57,3 +59,22 @@ class PostForm(forms.ModelForm):
         post.author = author
         post.save()
         return post
+
+
+class OrganizationForm(forms.ModelForm):
+    class Meta:
+        model = Organization
+        fields = ['name', 'date', 'constitutors', 'address', 'link', 'description']
+        labels = {
+            'name': 'Название',
+            'date': 'Дата создания',
+            'constitutors': 'Учредители',
+            'address': 'Адрес',
+            'link': 'Ссылка',
+            'description': 'Описание',
+        }
+
+    def save(self):
+        organization = super(OrganizationForm, self).save(commit=False)
+        organization.save()
+        return organization

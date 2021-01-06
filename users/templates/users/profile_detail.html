@@ -8,7 +8,6 @@
 				</div>
 				<div class="media-body">
 					<h2 class="card-title">{{ object.user.first_name }} {{ object.user.last_name }}</h2>
-					<!-- <h5 class="card-text"><p>Права доступа: {{ object.access }}</p></h5> -->
                     <p>Организация: <a href="{% url 'organization-detail' object.organization_id %}">{{ object.organization.name }}</a></p>
 					<p>Должность: {{ object.position }}</p>
 					<p>Степень: {{ object.degree }}</p>
@@ -34,10 +33,13 @@
 			</div>
 		</div>
 		{% if user == object.user or role == 'moderator' %}
-			<div class="text-center">
-				<a class="btn bg-blue text-white" href="{% url 'grant_add' object.user_id %}">Добавить грант</a>
-				<a class="btn bg-blue text-white" href="{% url 'user-detail-update' object.user_id %}">Обновить</a>
-				<a class="btn btn-danger" href="{% url 'user-delete' object.user_id %}">Удалить аккаунт</a>
+			<div class="text-right">
+				<a class="btn bg-blue text-white mr-1" href="{% url 'grant_add' object.user_id %}">Добавить грант</a>
+				<a class="btn bg-blue text-white mr-1" href="{% url 'user-detail-update' object.user_id %}">Редактировать</a>
+{#                todo parsing on button push#}
+{#                todo parsing in demon#}
+                <a class="btn bg-blue text-white mr-1" href="{% url 'user-detail-update' object.user_id %}">Обновить статьи</a>
+				<a class="btn btn-danger" href="{% url 'user-delete' object.user_id %}">Удалить</a>
 			</div>
 		{% endif %}
 	</div>

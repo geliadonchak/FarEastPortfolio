@@ -15,10 +15,9 @@
 						{{ uform|crispy }}
 						{{ pform|crispy }}
 					</fieldset>
-					<div class="form-group">
-						<button class="btn btn-dark" type="submit">Сохранить</button>
-						<a class="btn bg-blue text-white" href="{% url 'user-detail' profile.user_id %}">Назад</a>
-						<a class="btn btn-danger" href="{% url 'user-delete' profile.id %}">Удалить аккаунт</a>
+					<div class="form-group text-right">
+						<button class="btn bg-blue text-white mr-1" type="submit">Сохранить</button>
+						<a class="btn btn-danger text-white" href="{% url 'user-detail' profile.user_id %}">Назад</a>
 					</div>
 				</form>
 			</div>
