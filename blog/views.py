@@ -10,6 +10,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from users.models import Profile
 from .forms import FilterForm, CommentForm, PostForm
 from .models import Post
+from transliterate import translit
 
 
 def home(request):
@@ -19,7 +20,7 @@ def home(request):
         if filter_form.is_valid():
             content = filter_form.cleaned_data.get('content').strip()
             author = filter_form.cleaned_data.get('author')
-            author = transliterate_to_ru(author)
+            author = translit(author, 'ru')
             organization = filter_form.cleaned_data.get('organization')
             organization = organization.upper()
             journal = filter_form.cleaned_data.get('journal')
@@ -35,10 +36,12 @@ def home(request):
                 if len(author) == 1:
                     posts += Post.objects.filter(has_moderated=True).filter(
                         Q(author__first_name__icontains=author[0]) | Q(author__last_name__icontains=author[0])).all()
-                elif len(author) == 2:
+                elif len(author) >= 2:
+                    first_name = author[0]
+                    last_name = ' '.join([str(author[i]) for i in range(1, len(author))])
                     posts += Post.objects.filter(has_moderated=True).filter(
-                        (Q(author__first_name__icontains=author[0]) & Q(author__last_name__icontains=author[1])) |
-                        (Q(author__first_name__icontains=author[1]) & Q(author__last_name__icontains=author[0]))).all()
+                        (Q(author__first_name__icontains=first_name) & Q(author__last_name__icontains=last_name)) |
+                        (Q(author__first_name__icontains=last_name) & Q(author__last_name__icontains=first_name))).all()
             if organization:
                 posts += Post.objects.filter(has_moderated=True).filter(
                     author__profile__organization__name__icontains=organization).all()
@@ -101,8 +104,13 @@ def post_detail(request, pk=None):
     for comment in comments:
         cleanr = re.compile('<.*?>')
         comment.content = re.sub(cleanr, '', comment.content)
+
+    size = -1
+    if post.file:
+        size = round(post.file.size / 2.0 ** 20, 2)
+
     return render(request, 'blog/post_detail.html', {
-        'object': post, 'form': form, 'comments': comments, 'size': round(post.file.size / 2.0 ** 20, 2)
+        'object': post, 'form': form, 'comments': comments, 'size': size
     })
 
 
@@ -165,45 +173,4 @@ def view_publish_post(request, pk):
     post = Post.objects.get(pk=pk)
     post.has_moderated = True
     post.save()
-    return redirect('blog-home')
-
-
-def delete_several_posts(request):
-    print(request.POST)
-    return redirect('blog-home')
-
-
-def publish_several_posts(request):
-    return None
-
-
-DICTIONARY = {'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
-              'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'i', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n',
-              'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h',
-              'ц': 'c', 'ч': 'cz', 'ш': 'sh', 'щ': 'scz', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e',
-              'ю': 'u', 'я': 'ja', 'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'E',
-              'Ж': 'ZH', 'З': 'Z', 'И': 'I', 'Й': 'I', 'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N',
-              'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ф': 'F', 'Х': 'H',
-              'Ц': 'C', 'Ч': 'CZ', 'Ш': 'SH', 'Щ': 'SCH', 'Ъ': '', 'Ы': 'y', 'Ь': '', 'Э': 'E',
-              'Ю': 'U', 'Я': 'YA', ',': '', '?': '', ' ': ' ', '~': '', '!': '', '@': '', '#': '',
-              '$': '', '%': '', '^': '', '&': '', '*': '', '(': '', ')': '', '-': '', '=': '', '+': '',
-              ':': '', ';': '', '<': '', '>': '', '\'': '', '"': '', '\\': '', '/': '', '№': '',
-              '[': '', ']': '', '{': '', '}': '', 'ґ': '', 'ї': '', 'є': '', 'Ґ': 'g', 'Ї': 'i',
-              'Є': 'e', '—': ''}
-
-
-def transliterate_to_en(name):
-    for key in DICTIONARY:
-        name = name.replace(key, DICTIONARY[key])
-    return name
-
-
-def transliterate_to_ru(name):
-    dictionary = DICTIONARY
-    symbols = ['ё', 'Ё', 'ъ', 'Ъ', 'ь', 'Ь', 'ю', 'Ю', 'я', 'Я']
-    for s in symbols:
-        dictionary[s] = ''
-
-    for key, value in DICTIONARY:
-        name = name.replace(value, key)
-    return name
+    return redirect('suggested-post')

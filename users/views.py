@@ -1,9 +1,10 @@
+from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
 from blog.models import Post
-from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, GrantForm
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, GrantForm, UserLoginForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden, HttpResponseNotFound
 from django.contrib.auth.models import User
@@ -30,12 +31,16 @@ def sign_up(request):
     return render(request, 'users/signup.html', {'uform': uform, 'pform': pform})
 
 
+class NewLoginView(LoginView):
+    form_class = UserLoginForm
+
+
 @login_required
 def user_update_profile(request, pk):
     if str(request.user.groups.first()) != "Moderator" and not (request.user.id == pk):
         return HttpResponseForbidden()
 
-    profile = Profile.objects.get(pk=pk)
+    profile = Profile.objects.get(user_id=pk)
 
     if request.method == 'POST':
         uform = UserUpdateForm(request.POST, instance=profile.user)
@@ -45,7 +50,7 @@ def user_update_profile(request, pk):
             user = uform.save(profile.user.username)
             pform.save(profile.user)
             messages.success(request, f'Account has been updated')
-            return redirect('user-detail', profile.id)
+            return redirect('user-detail', profile.user_id)
     else:
         uform = UserUpdateForm(instance=profile.user)
         pform = ProfileUpdateForm(instance=profile)
@@ -79,10 +84,8 @@ class UserDeleteView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixi
 
 
 def user_detail(request, pk):
-    profile = Profile.objects.get(id__exact=pk)
+    profile = Profile.objects.get(user_id=pk)
     return render(request, 'users/profile_detail.html', {'object': profile, 'grants': profile.grant_set.all()})
-
-# TODO debug
 
 
 def grant_add(request, pk):
@@ -97,13 +100,13 @@ def grant_add(request, pk):
             return redirect('user-detail', profile.id)
     else:
         form = GrantForm()
-    return render(request, 'users/grant_add.html', {'profile': Profile.objects.get(pk=pk), 'form': form})
+    return render(request, 'users/grant_add.html', {'profile': Profile.objects.get(user_id=pk), 'form': form})
 
 
 class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
-     def get_queryset(self):
+    def get_queryset(self):
         orgs = Organization.objects.all()
-        
+
         if self.q:
             orgs = orgs.filter(name__istartswith=self.q)
 
@@ -113,7 +116,7 @@ class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
 class OrganizationCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Organization
     fields = ['name', 'date', 'constitutors', 'address', 'link', 'description']
-    
+
     def test_func(self):
         if not self.request.user.profile.access == 'Пользователь':
             return True
@@ -127,8 +130,8 @@ class OrganizationDetailView(DetailView):
 def organization_detail(request, pk):
     try:
         organization = Organization.objects.get(id=pk)
-        organization_posts = Post.objects.all().filter(author__profile__organization_id=pk).filter(has_moderated=True).reverse()
+        organization_posts = Post.objects.all().filter(author__profile__organization_id=pk).filter(
+            has_moderated=True).reverse()
         return render(request, 'users/organization_detail.html', {'object': organization, 'posts': organization_posts})
     except ObjectDoesNotExist:
         return HttpResponseNotFound()
-

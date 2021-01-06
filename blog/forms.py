@@ -5,12 +5,6 @@ from crispy_forms.layout import Layout
 
 
 class FilterForm(forms.Form):
-    # filters = [('by_author', 'По автору'),
-    #            ('by_content', 'По содержанию'),
-    #            ('by_journal', 'По журналу'),
-    #            ('by_org', 'По организации')]
-
-    # filter_name = forms.ChoiceField(choices=filters, widget=forms.RadioSelect, label='Выберите критерий поиска')
     author = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Автор'}), label='',
                              max_length=300,
                              required=False)
@@ -27,6 +21,9 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['content']
+        labels = {
+            'content': 'Комментарий'
+        }
 
     def form_valid(self, form, post):
         form.instance.author = self.request.user
@@ -45,6 +42,15 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ['title', 'content', 'date', 'journal', 'volume', 'number', 'file']
+        labels = {
+            'title': 'Название',
+            'content': 'Описание',
+            'date': 'Год публикации',
+            'journal': 'Журнал',
+            'volume': 'Том',
+            'number': 'Номер',
+            'file': 'Файл',
+        }
 
     def save(self, author):
         post = super(PostForm, self).save(commit=False)

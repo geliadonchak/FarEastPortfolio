@@ -1,13 +1,17 @@
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UsernameField
 from .models import Profile, Grant
 from dal import autocomplete
 
 
 class UserRegisterForm(UserCreationForm):
     class Meta:
+        error_messages = {
+            'password_mismatch': "Введенные пароли не совпадают.",
+        }
+
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
         labels = {
@@ -15,8 +19,8 @@ class UserRegisterForm(UserCreationForm):
         }
 
     email = forms.EmailField()
-    first_name = forms.CharField(max_length=100, label='Имя, Очество')
-    last_name = forms.CharField(max_length=100, label='Фамилия')
+    first_name = forms.CharField(max_length=100, label='Фамилия')
+    last_name = forms.CharField(max_length=100, label='Имя, Очество')
     password1 = forms.CharField(
         label='Пароль',
         strip=False,
@@ -31,12 +35,34 @@ class UserRegisterForm(UserCreationForm):
     )
 
 
+class UserLoginForm(AuthenticationForm):
+    error_messages = {
+        'invalid_login': "Пожалуйста введите корректное имя пользователя и пароль.",
+        'inactive': "Этот аккаунт неактивен.",
+    }
+
+    username = UsernameField(widget=forms.TextInput(attrs={'autofocus': True}), label='Имя пользователя')
+    password = forms.CharField(
+        label='Пароль',
+        strip=False,
+        widget=forms.PasswordInput,
+    )
+
+
+# class UserLogoutForm():
+
+
 class UserUpdateForm(forms.ModelForm):
     email = forms.EmailField()
 
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
+        labels = {
+            'first_name': 'Фамилия',
+            'last_name': 'Имя, отчество',
+            'email': 'Email',
+        }
 
     def save(self, username, commit=True):
         instance = super(UserUpdateForm, self).save(commit=False)
@@ -75,6 +101,14 @@ class GrantForm(forms.ModelForm):
     class Meta:
         model = Grant
         fields = ['name', 'year_from', 'year_to', 'fund', 'amount', 'link']
+        labels = {
+            'name': 'Название',
+            'year_from': 'С какого года',
+            'year_to': 'По какой год',
+            'fund': 'Фонд',
+            'amount': 'Сумма',
+            'link': 'Ссылка',
+        }
 
     def save(self, profile, commit=True):
         instance = super(GrantForm, self).save(commit=False)

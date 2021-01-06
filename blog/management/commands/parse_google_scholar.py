@@ -10,6 +10,7 @@ SEARCH_URL = '/scholar?hl=ru&q={query}'
 
 SEARCH_PAGE_REGEXP = r'<h3[^>]*gs_rt.*?<a[^>]*href=\"(?P<url>[^\"]*)\"[^>]*>(?P<title>[^<]*)<\/a.*?<div[^>]*class=\"gs_a\"[^>]*>(?P<authors>[^-]*)-(?P<other>.*?)-'
 SEARCH_NEXT_PAGE_REGEXP = r'<a href=\"(?P<nextPage>[^\"]*)\"><span[^>]*gs_ico_nav_next[^>]*></span><b[^>]*>Следующая</b></a></td>'
+CONTENT_TEMPLATE = "Полный текст статьи можно найти по ссылке: <a href=\"{}\">{}</a>"
 MAX_PAGE_NUMBER = 3
 
 NAMES_MAPPER = {
@@ -56,7 +57,7 @@ class Command(BaseCommand):
         url = self.clean_str(str(match[NAMES_MAPPER['url']]))
 
         post.title = self.clean_str(str(match[NAMES_MAPPER['title']]))
-        post.content = "<a href=\"{}\">{}</a>".format(url, url)
+        post.content = CONTENT_TEMPLATE.format(url, url)
 
         other_info = str(match[NAMES_MAPPER['other']]).strip()
         year_match = re.search(r'\d{4}', other_info)

@@ -23,23 +23,24 @@
                             </h2>
                         </a>
                         <p class="card-text">{{ post.content|truncatewords:100|safe|escape }}</p>
-                        <!-- <a href="#" class="btn btn-primary">Read More &rarr;</a> -->
                     </div>
-                    <!-- FIX IT -->
                     <div class="row card-footer bg-white ml-1 mr-1 pl-0 pr-0">
                         <div class="col text-left">
-                            <a href="{% url 'user-detail' post.author.profile.id %}">
+                            <a href="{% url 'user-detail' post.author.profile.user_id %}">
                                 {{ post.author.first_name }} {{ post.author.last_name }}
                             </a>
-                            {{ post.date|date:"F d, Y" }} {{ post.journal }} {{ post.volume }} {{ post.number }}
+                            {% if post.date %} {{ post.date|date:"F d, Y" }} {% endif %}
+                            {% if post.journal %} {{ post.journal }} {% endif %}
+                            {% if post.volume %} {{ post.volume }} {% endif %}
+                            {% if post.number %} {{ post.number }} {% endif %}
                         </div>
                         <div class="col text-right">
                             <a href="{% url 'post-detail' post.id %}">Подробнее</a>
                         </div>
                         <div class="text-center">
-				            <a class="btn bg-blue text-white" href="{% url 'post-publish' post.id %}">Опубликовать</a>
-				            <a class="btn btn-danger text-white" href="{% url 'post-delete' post.id %}">Удалить</a>
-			            </div>
+                            <a class="btn bg-blue text-white" href="{% url 'post-publish' post.id %}">Опубликовать</a>
+                            <a class="btn btn-danger text-white" href="{% url 'post-delete' post.id %}">Удалить</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -82,38 +83,7 @@
         </ul>
     </div>
 
-    <!--
-    <ul class="pagination justify-content-center mb-4">
-        <li class="page-item">
-            <a class="page-link" href="#">&larr; Older</a>
-        </li>
-        <li class="page-item disabled">
-            <a class="page-link" href="#">Newer &rarr;</a>
-        </li>
-    </ul>
-    -->
 {% endblock content %}
 
 {% block sidebar %}
-    <!-- Search Widget --
-    <div class="card shadow-lg">
-        <h5 class="card-header">Search</h5>
-        <div class="card-body">
-            <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search for...">
-                <span class="input-group-btn">
-                    <button class="btn btn-secondary" type="button">Go!</button>
-                </span>
-            </div>
-        </div>
-    </div>
-    -->
-    <!-- Filter Widget -->
-    <!-- Categories Widget
-    <div class="card my-4 shadow-lg">
-        <h5 class="card-header">Categories</h5>
-        <div class="card-body">
-        </div>
-    </div>
-    -->
 {% endblock %}

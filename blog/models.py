@@ -8,11 +8,12 @@ import datetime
 
 YEAR_CHOICES = [(r, r) for r in range(1950, datetime.date.today().year + 1)]
 
+
 class Post(models.Model):
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=200)
     content = HTMLField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    journal = models.CharField(max_length=150)
+    journal = models.CharField(max_length=150, blank=True, null=True)
     volume = models.IntegerField(blank=True, null=True)
     number = models.IntegerField(blank=True, null=True)
     date = models.IntegerField(choices=YEAR_CHOICES, null=True, blank=True)
