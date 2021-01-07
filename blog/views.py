@@ -1,6 +1,7 @@
 import re
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.management import call_command
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponseForbidden
@@ -174,3 +175,11 @@ def view_publish_post(request, pk):
     post.has_moderated = True
     post.save()
     return redirect('suggested-post')
+
+
+def update_user_posts(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    call_command('parse_google_scholar', user=request.user.id)
+    return redirect('my-posts')

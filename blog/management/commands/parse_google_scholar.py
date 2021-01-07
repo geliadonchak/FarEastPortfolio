@@ -39,7 +39,7 @@ class Command(BaseCommand):
         page_number = 1
 
         while page_number <= MAX_PAGE_NUMBER:
-            print("Query: " + query + "; page: " + str(page_number))
+            print("[GoogleScalarParser] Query: " + query + "; page: " + str(page_number))
             page = requests.get(url).text
             for match in re.findall(SEARCH_PAGE_REGEXP, page):
                 self.save_post(match)
@@ -77,10 +77,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         user = User.objects.filter(pk=int(options['user'])).all().values()
         if len(user) != 1:
-            print("Пользователь с id {} не найден".format(options['user']))
+            print("[GoogleScalarParser] Пользователь с id {} не найден".format(options['user']))
             return
         query = user[0]['first_name'] + ' ' + user[0]['last_name']
         self.current_user_id = user[0]['id']
+
+        print("[GoogleScalarParser] Начало парсинга для пользователя {}".format(options['user']))
 
         self.parse_search_pages(query)
 
@@ -92,4 +94,4 @@ class Command(BaseCommand):
                 count += 1
                 post.save()
 
-        print("Сохранено {} статей".format(count))
+        print("[GoogleScalarParser] Сохранено {} статей".format(count))

@@ -29,8 +29,7 @@ def sign_up(request):
 
             user = User.objects.filter(username=username).all().values()
             if len(user) == 1:
-                user_id = user[0]['id']
-                call_command('parse_google_scholar', user=user_id, interactive=False)
+                call_command('parse_google_scholar', user=user[0]['id'])
 
             return redirect('login')
     else:
