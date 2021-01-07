@@ -10,7 +10,7 @@ class Organization(models.Model):
     constitutors = models.CharField(max_length=200, blank=True, null=True)
     address = models.CharField(max_length=200, blank=True, null=True)
     link = models.URLField()
-    description = models.CharField(max_length=500, blank=True, null=True)
+    description = models.CharField(max_length=1000, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -44,7 +44,7 @@ class Profile(models.Model):
         if img.height > 150 or img.width > 150:
             output_size = (150, 150)
             img.thumbnail(output_size)
-            img.save(self.image.path)
+            img.save()
 
 
 class Grant(models.Model):

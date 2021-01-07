@@ -16,8 +16,6 @@ urlpatterns = [
     path('admin_panel/', user_views.admin_panel, name='admin-panel'),
     path('organization-autocomplete', user_views.OrganizationAutocomplete.as_view(), name='organization-autocomplete'),
     path('organization/<int:pk>', user_views.organization_detail, name='organization-detail'),
-    # todo fix creating org
-    # todo understand what is tinymce
     path('organization/new', user_views.organization_create, name='organization-create'),
     path('tinymce/', include('tinymce.urls')),
 ]

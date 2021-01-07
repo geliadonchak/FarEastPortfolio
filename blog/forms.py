@@ -74,7 +74,7 @@ class OrganizationForm(forms.ModelForm):
             'description': 'Описание',
         }
 
-    def save(self):
+    def save(self, **kwargs):
         organization = super(OrganizationForm, self).save(commit=False)
         organization.save()
         return organization

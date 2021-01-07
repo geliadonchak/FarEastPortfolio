@@ -124,7 +124,14 @@ class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
 def organization_create(request):
     if not request.user.is_staff:
         return HttpResponseForbidden()
-    form = OrganizationForm()
+
+    if request.method == 'POST':
+        form = OrganizationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('blog-home')
+    else:
+        form = OrganizationForm()
     return render(request, 'users/organization_form.html', {'form': form})
 
 
