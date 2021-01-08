@@ -19,8 +19,8 @@ class UserRegisterForm(UserCreationForm):
         }
 
     email = forms.EmailField()
-    first_name = forms.CharField(max_length=100, label='Фамилия')
-    last_name = forms.CharField(max_length=100, label='Имя, Очество')
+    first_name = forms.CharField(max_length=100, label='Фамилия', required=True)
+    last_name = forms.CharField(max_length=100, label='Имя, Очество', required=True)
     password1 = forms.CharField(
         label='Пароль',
         strip=False,

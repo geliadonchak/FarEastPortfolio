@@ -1,6 +1,7 @@
 import re
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.paginator import Paginator
 from django.db.models import Q
