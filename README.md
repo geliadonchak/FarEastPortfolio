@@ -12,6 +12,19 @@ Tested with:
 
 # Installation for development
 
+Install mariadb-server, create user and database
+Fill db credentials in settings.py
+Import dump.sql
+```
+mysql -u[user] -p[password] [database_name] < dump.sql
+```
+
+Available test users (use "525234" as password for all users):
+- admin
+- moder
+- sushchenko.aa
+
+Install python requirements and run server
 ```
 pip install -r requirements.txt
 python manage.py migrate
