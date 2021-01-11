@@ -153,9 +153,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         post = self.get_object()
-        if self.request.user == post.author or not self.request.user.profile.access == 'Пользователь':
-            return True
-        return False
+        return self.request.user == post.author or not self.request.user.profile.access == 'Пользователь'
 
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -164,9 +162,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         post = self.get_object()
-        if self.request.user == post.author or not self.request.user.profile.access == 'Пользователь':
-            return True
-        return False
+        return self.request.user == post.author or not self.request.user.profile.access == 'Пользователь'
 
 
 def view_publish_post(request, pk):
